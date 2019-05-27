@@ -1,0 +1,9 @@
+{
+    "editor.tabSize":2,
+    "eslint.alwaysShowStatus":"true",
+    "javascript.validate.enable":"false",
+    "javascript.format.enable":"false",
+    "flow.enabled":"true",
+    "flow.useNPMPackagedFlow":"true"
+
+}
