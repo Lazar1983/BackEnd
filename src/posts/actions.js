@@ -30,24 +30,29 @@ const { posts } = urlConfig;
 // }
 
 const get = async(req, res, next) => {
-  const { id }: { id: string } = req.params;
+  const { id } : { id: string } = req.params;
   
   const getPosts: Object = await axios.get(posts);
   const { data } = getPosts;
 
   const post: Object = data.filter(post => post.id.toString() === id); //da filtrira se i da najde spored zadadenoto id od req.params
-
+  console.log(post);
   const postsIds = data.map(i => i.id.toString()); //za da se pretvori se vo string
+  console.log(postIds);
   const checkPost: boolean = postsIds.includes(id);
-
+  console.log(checkPost);
   if (checkPost) {
     const checkFile: boolean = fs.existsSync('localStorage.json');
+    console.log(checkFile);
     if (checkFile) {
       const readStorageFile = fs.readFileSync('localStorage.json');
+      console.log(readStorageFile);
       const parsedReadStorageData: Array = JSON.parse(readStorageFile);
+      console.log(parsedReadStorageData);
       parsedReadStorageData.push(...post); //...posts
       
       const writeDataToStorageFile: string = JSON.stringify(parsedReadStorageData, null, 2);  // null, 2
+      console.log(writeDataToStorageFile);
       fs.writeFileSync('localStorage.json', writeDataToStorageFile);
     } else {
       const writeDataToStorageFile: string = JSON.stringify(post, null, 2);
