@@ -35,33 +35,34 @@ const get = async(req, res, next) => {
   const getPosts: Object = await axios.get(posts);
   const { data } = getPosts;
 
-  const post: Object = data.filter(post => post.id.toString() === id); //da filtrira se i da najde spored zadadenoto id od req.params
-  console.log(post);
-  const postsIds = data.map(i => i.id.toString()); //za da se pretvori se vo string
-  console.log(postIds);
-  const checkPost: boolean = postsIds.includes(id);
-  console.log(checkPost);
-  if (checkPost) {
-    const checkFile: boolean = fs.existsSync('localStorage.json');
-    console.log(checkFile);
-    if (checkFile) {
-      const readStorageFile = fs.readFileSync('localStorage.json');
-      console.log(readStorageFile);
-      const parsedReadStorageData: Array = JSON.parse(readStorageFile);
-      console.log(parsedReadStorageData);
-      parsedReadStorageData.push(...post); //...posts
+  // const post: Object = data.filter(post => post.id.toString() === id); //da filtrira se i da najde spored zadadenoto id od req.params
+  // console.log(post);
+  // const postsIds = data.map(i => i.id.toString()); //za da se pretvori se vo string
+  // console.log(postIds);
+  // const checkPost: boolean = postsIds.includes(id);
+  // console.log(checkPost);
+
+  // if (checkPost) {
+  //   const checkFile: boolean = fs.existsSync('localStorage.json');
+  //   console.log(checkFile);
+  //   if (checkFile) {
+  //     const readStorageFile = fs.readFileSync('localStorage.json');
+  //     console.log(readStorageFile);
+  //     const parsedReadStorageData: Array = JSON.parse(readStorageFile);
+  //     console.log(parsedReadStorageData);
+  //     parsedReadStorageData.push(...post); //...posts
       
-      const writeDataToStorageFile: string = JSON.stringify(parsedReadStorageData, null, 2);  // null, 2
-      console.log(writeDataToStorageFile);
-      fs.writeFileSync('localStorage.json', writeDataToStorageFile);
-    } else {
-      const writeDataToStorageFile: string = JSON.stringify(post, null, 2);
-      fs.writeFileSync('localStorage.json', writeDataToStorageFile);
-    }
-    res.status(200).send(post);
-  } else {
-    res.status(404).send({ message: `Posts id ${id} is not found`});
-  }
+  //     const writeDataToStorageFile: string = JSON.stringify(parsedReadStorageData, null, 2);  // null, 2
+  //     console.log(writeDataToStorageFile);
+  //     fs.writeFileSync('localStorage.json', writeDataToStorageFile);
+  //   } else {
+  //     const writeDataToStorageFile: string = JSON.stringify(post, null, 2);
+  //     fs.writeFileSync('localStorage.json', writeDataToStorageFile);
+  //   }
+  //   res.status(200).send(post);
+  // } else {
+  //   res.status(404).send({ message: `Posts id ${id} is not found`});
+  // }
   await next;
 };
 
@@ -146,14 +147,17 @@ const update = async (req, res, next) => {
 const del = async (req, res, next) => {
   const numbersAsAStrings = ['1', '2', '3', '4', '5'];
   const findIndexFromArray = numbersAsAStrings.findIndex(id => id === '3');
+
   
+
   console.log(findIndexFromArray);
 
   // exercise 2
   // find a way of removing item from array (in our case from a local storage file) 
   // using the same approach as the above example in order to find index of that
   
-  // const removeFromArray = 
+  const removeFromArray = removeItem({ id, userId, title, likes, body, commNums, notify }, null, 2);
+  
   await next;
 };
 

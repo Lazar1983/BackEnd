@@ -1,5 +1,5 @@
 import actions from './actions';
-import routes from './routes';
+import routes from './router';
 
 export default {
   actions,
