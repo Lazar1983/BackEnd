@@ -113,10 +113,10 @@ const create = async (req, res, next) => {
   } = req.body;
 
   const checkFile: boolean = fs.existsSync('localStorage.json');
-  // console.log('Does file exists?', checkFile);
+  console.log('Does file exists?', checkFile);
   if (checkFile) {
     const readStorageFile = fs.readFileSync('localStorage.json');
-    // console.log('reader 1', readStorageFile);
+    console.log('reader 1', readStorageFile);
     const parsedReadStorageFile = JSON.parse(readStorageFile);
     // console.log('reader 2', parsedReadStorageFile);
     const arr: Array = [];
@@ -147,18 +147,16 @@ const update = async (req, res, next) => {
 const del = async (req, res, next) => {
   const numbersAsAStrings = ['1', '2', '3', '4', '5'];
   const findIndexFromArray = numbersAsAStrings.findIndex(id => id === '3');
-
-  
-
   console.log(findIndexFromArray);
 
   // exercise 2
   // find a way of removing item from array (in our case from a local storage file) 
   // using the same approach as the above example in order to find index of that
   
-  const removeFromArray = removeItem({ id, userId, title, likes, body, commNums, notify }, null, 2);
+  // const removeFromArray = removeItem(findIndexFromArray);
   
   await next;
+
 };
 
 export default {
