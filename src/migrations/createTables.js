@@ -1,5 +1,5 @@
 const usersCreateModel = `
-  CREATE TABLE users (
+  CREATE TABLE mzt (
     id INT NOT NULL,
     firstName CHAR(25),
     lastName CHAR(25),

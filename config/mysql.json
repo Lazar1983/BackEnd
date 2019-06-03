@@ -1,8 +1,9 @@
 {
   "dev": {
-    "database": "groupcdb",
+    "database": "mzt",
     "host": "localhost",
     "user": "root",
+    "password": "root",
     "port": 3306
   },
   "stagin": {

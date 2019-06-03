@@ -8,7 +8,8 @@ const { usersCreateModel } = models;
 const con = mysql.createConnection(dbConfig);
 
 con.connect(() => {
-  console.log("db is on")
+  console.log("db is on");
+  con.query(usersCreateModel)
 }
 
 );
