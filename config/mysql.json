@@ -1,0 +1,14 @@
+{
+  "dev": {
+    "database": "groupcdb",
+    "host": "localhost",
+    "user": "codeacademy",
+    "port": 3306
+  },
+  "stagin": {
+
+  },
+  "productions": {
+
+  }
+}
