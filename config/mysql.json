@@ -2,7 +2,7 @@
   "dev": {
     "database": "groupcdb",
     "host": "localhost",
-    "user": "codeacademy",
+    "user": "root",
     "port": 3306
   },
   "stagin": {

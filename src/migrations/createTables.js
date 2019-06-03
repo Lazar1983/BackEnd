@@ -1,4 +1,4 @@
-const usersModel = `
+const usersCreateModel = `
   CREATE TABLE users (
     id INT NOT NULL,
     firstName CHAR(25),
@@ -11,5 +11,5 @@ const usersModel = `
 // const
 
 export default {
-  usersModel
+  usersCreateModel
 }

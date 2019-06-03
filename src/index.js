@@ -3,11 +3,11 @@ import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import logger from 'morgan';
 import cors from 'cors';
-
+import database from './database/mysql.js';
 import indexRouter from './index/router';
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3003;
 
 app.use(logger('dev'));
 app.use(cors());
