@@ -1,9 +1,8 @@
-
 import database from '../database/mysql';
 const { con } = database;
 
  const list = async(req, res, next) => {
-  const listingUsers = 'SELECT * FROM users'
+  const listingUsers = 'SELECT * FROM mzt.users'
   return con.query(listingUsers, (err, results, fields) => {
     if (err) {
       throw err;
