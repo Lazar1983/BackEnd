@@ -7,7 +7,7 @@ import database from './database/mysql.js';
 import indexRouter from './index/router';
 
 const app = express();
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3004;
 
 app.use(logger('dev'));
 app.use(cors());

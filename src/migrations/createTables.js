@@ -1,5 +1,5 @@
 const usersCreateModel = `
-  CREATE TABLE IF NOT EXISTS Zoki (
+  CREATE TABLE IF NOT EXISTS users (
     id INT NOT NULL,
     firstName CHAR(25),
     lastName CHAR(25),
@@ -8,7 +8,7 @@ const usersCreateModel = `
   )
 `;
 
-// const
+
 
 export default {
   usersCreateModel

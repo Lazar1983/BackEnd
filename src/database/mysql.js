@@ -1,7 +1,7 @@
 import mysql from 'mysql';
 import mysqlConfigs from '../../config/mysql';
 import models from '../migrations/createTables';
-import { userInfo } from 'os';
+// import { userInfo } from 'os';
 
 
 const dbConfig = mysqlConfigs['dev'];
@@ -13,4 +13,6 @@ con.connect(() => {
   con.query(usersCreateModel);
 });
 
-export default con;
+export default {
+  con
+};
