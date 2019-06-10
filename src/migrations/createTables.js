@@ -8,8 +8,19 @@ const usersCreateModel = `
   )
 `;
 
+const postsCreateModel = `
+  CREATE TABLE IF NOT EXISTS posts (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    text VARCHAR(400),
+    likes INT,
+    comments INT,
+    PRIMARY KEY (id)
+  )
+`;
+
 
 
 export default {
-  usersCreateModel
+  usersCreateModel,
+  postsCreateModel,
 }

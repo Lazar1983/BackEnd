@@ -132,6 +132,6 @@ export default {
   create,
   list,
   get,
-  delete,
+  del,
   update
 } 
