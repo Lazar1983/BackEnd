@@ -21,7 +21,7 @@ async function list(req, res, next) {
   await next;
 };
 
-function createPost() {
+function createPost(text,likes,comments) {
   return new Promise((resolve, reject) => {
     con.query(insertIntoPosts, [text,likes,comments], (err, results) => {
       if (err) {
@@ -43,9 +43,9 @@ async function create(req, res, next) {
     comments: number
   } = req.body;
   
-  const posts = await createPost();
+  const post = await createPost(text, likes, comments);
   
-  res.status(201).send({ success: true, message: 'A posts is create', body: posts });
+  res.status(201).send({ success: true, message: 'A posts is create', body: {text, likes, comments}});
   await next;
 };
 
