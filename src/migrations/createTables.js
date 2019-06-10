@@ -3,8 +3,8 @@ const usersCreateModel = `
     id INT NOT NULL,
     firstName CHAR(25),
     lastName CHAR(25),
-    username VARCHAR(50),
-    email VARCHAR(75)
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(75) NOT NULL
   )
 `;
 
