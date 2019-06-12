@@ -2,7 +2,7 @@ import database from '../database/mysql';
 import queries from '../migrations/queriesSql';
 
 const { con } = database;
-const { listingPosts, getSingleItemFromPostsPerId, insertIntoPosts } = queries;
+const { listingPosts, getSingleItemFromPostsPerId, insertIntoPosts, deleteSinglePost } = queries;
 
 function listingAllPosts() {
   return new Promise((resolve, reject) => {
@@ -21,9 +21,9 @@ async function list(req, res, next) {
   await next;
 };
 
-function getOnePost(userId) {
+function getOnePost(id) {
   return new Promise((resolve, reject) => {
-  con.query(getSingleItemFromPostsPerId, [Number(userId)], (err, results) => {
+  con.query(getSingleItemFromPostsPerId, [Number(id)], (err, results) => {
     if (err) {
       reject(err);
     }
@@ -69,8 +69,31 @@ async function create(req, res, next) {
   await next;
 };
 
+function deletePost(id) {
+  return new Promise((resolve, reject) => {
+    return con.query(deleteSinglePost, parseInt(id), (err, results) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(results);
+    });
+  });
+};
+
+async function del(req, res, next) {
+  const { id }: { id: string } = req.params;
+  
+  const deleteOnePost : Object  = await deletePost(id);
+  
+  res.status(202).send({ success: true, message: 'Post is deleted'});
+  await next;
+};
+
+
+
 export default {
   list,
   create,
-  get
+  get,
+  del
 }
