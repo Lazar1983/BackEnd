@@ -2,7 +2,7 @@ import database from '../database/mysql';
 import queries from '../migrations/queriesSql';
 
 const { con } = database;
-const { listingPosts, getSingleItemFromPostsPerId, insertIntoPosts, deleteSinglePost } = queries;
+const { listingPosts, getSingleItemFromPostsPerId, insertIntoPosts, deleteSinglePost, updatePost } = queries;
 
 function listingAllPosts() {
   return new Promise((resolve, reject) => {
@@ -89,11 +89,45 @@ async function del(req, res, next) {
   await next;
 };
 
+function updateSinglePost(text,likes,comments) {
+  return new Promise((resolve, reject) => {
+    con.query(updatePost, [text,likes,comments], (err, results) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(results);
+    });
+  });
+};
+
+async function update(req, res, next) {
+  const { id }: { id: string } = req.params;
+  const {
+    text,
+    likes,
+    comments
+  }:{
+    text: string,
+    likes: number,
+    comments: number
+  } = Object.assign({}, req.body);
+  const postId = req.body.id;
+  
+  if (postId) {
+    res.status(403).send(`Id ${id} is taken`);
+  } else {
+    const updatePostPerId = await updateSinglePost(text,likes,comments);
+    res.status(204).send({ success: true, message: 'A posts is updated', body: {text,likes,comments}});
+    };
+  await next;
+};
+
 
 
 export default {
   list,
   create,
   get,
-  del
+  del,
+  update
 }
