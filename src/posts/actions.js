@@ -21,6 +21,26 @@ async function list(req, res, next) {
   await next;
 };
 
+function getOnePost(userId) {
+  return new Promise((resolve, reject) => {
+  con.query(getSingleItemFromPostsPerId, [Number(userId)], (err, results) => {
+    if (err) {
+      reject(err);
+    }
+    resolve(results);
+  });
+  });
+};
+
+async function get(req, res, next) {
+  const { id }: { id: string } = req.params;
+  const posts: Object = await getOnePost(id);
+  res.status(200).send({ success: true, message: 'A one post', body: posts });
+  await next;
+};
+
+
+
 function createPost(text,likes,comments) {
   return new Promise((resolve, reject) => {
     con.query(insertIntoPosts, [text,likes,comments], (err, results) => {
@@ -51,5 +71,6 @@ async function create(req, res, next) {
 
 export default {
   list,
-  create
+  create,
+  get
 }
