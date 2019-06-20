@@ -93,12 +93,43 @@ const update = async(req, res, next) => {
   }: {
     firstName: ?string,
     lastName: ?string,
-    username: string,
-    email: string
+    username: ?string,
+    email: ?string
   } = Object.assign({}, req.body);
   const userId = req.body.id;
+
+ 
   if (userId) {
     res.status(403).send(`Id ${id} should not be overwritten`);
+    if(!username || !email) {
+      const getUser = 'SELECT * FROM users WHERE id = ?'
+      con.query(getUser, [Number(id)], (err, results, fields) => {
+        if (err) {
+          console.error(err);
+        }
+        res.status(204).send(results);
+      });
+
+      if(!username){
+        const username = getuser.username;
+      } 
+      if(!email){
+        const getEmail = getuser.email;
+      }
+    }
+    if (usersId.includes(userEmail)) {
+      const updateEmailQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${user.username}, email = ${user.email} WHERE id = ?`
+      return con.query(updateEmailQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
+      if (err) {
+        console.error(err);
+      }
+      res.status(204).send(results);
+    });
+    }
+    else {
+
+    res.status(403).send(`такен`);
+    }
   } else {
     const updateUserQuery = 'UPDATE users SET firstName = ?, lastName = ?, username = ?, email = ? WHERE id = ?'
     return con.query(updateUserQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
@@ -107,7 +138,7 @@ const update = async(req, res, next) => {
       }
       res.status(204).send(results);
     });
-  }
+    }
   await next;
 }
 

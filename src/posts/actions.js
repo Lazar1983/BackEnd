@@ -2,7 +2,7 @@ import database from '../database/mysql';
 import queries from '../migrations/queriesSql';
 
 const { con } = database;
-const { listingPosts, getSingleItemFromPostsPerId, insertIntoPosts, deleteSinglePost, updatePost } = queries;
+const { listingPosts, getSingleItemFromPostsPerId, insertIntoPosts, deleteSinglePost, updatePost, homepage } = queries;
 
 function listingAllPosts() {
   return new Promise((resolve, reject) => {
@@ -38,7 +38,6 @@ async function get(req, res, next) {
   res.status(200).send({ success: true, message: 'A one post', body: posts });
   await next;
 };
-
 
 
 function createPost(text,likes,comments) {
