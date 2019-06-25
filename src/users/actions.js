@@ -48,16 +48,17 @@ async function create(req, res, next) {
     firstName,
     lastName,
     username,
-    email
+    email,
+    password
   }: {
     id: number,
     firstName: ?string,
     lastName: ?string,
     username: string,
-    email: string
+    email: string,
+    password: string,
   } = req.body;
-
-  // const username = req.body.username;
+  const createAt = new Date(Date.now());
   const listingUsersQuery = 'SELECT * FROM users';
   return con.query(listingUsersQuery, (err, results) => {
     if (err) {
@@ -70,12 +71,12 @@ async function create(req, res, next) {
     if (usersIds.includes(Number(id))) {
       res.status(400).send(`Id ${id} is already taken`);
     } else {
-      const addQuery = `INSERT INTO users VALUES (?, ?, ?, ?, ?)`
-      return con.query(addQuery, [id, firstName, lastName, username, email], (err, results) => {
+      const addQuery = `INSERT INTO users (firstName, lastName, username, email, password, created_at) VALUES (?, ?, ?, ?, ?, ?)`
+      return con.query(addQuery, [id, firstName, lastName, username, email, password, createAt], (err, results) => {
         if (err) {
           console.error(err);
         }
-        res.status(201).send({ data: { id, firstName, lastName, username, email }})
+        res.status(201).send({ data: { id, firstName, lastName, username, email, password }})
       });
     }
   })
@@ -97,48 +98,59 @@ const update = async(req, res, next) => {
     email: ?string
   } = Object.assign({}, req.body);
   const userId = req.body.id;
-
+  const userWithEmail = 'SELECT * FROM users WHERE email = ?'
  
   if (userId) {
     res.status(403).send(`Id ${id} should not be overwritten`);
-    if(!username || !email) {
-      const getUser = 'SELECT * FROM users WHERE id = ?'
-      con.query(getUser, [Number(id)], (err, results, fields) => {
+    
+    // if (usersId.includes(userEmail)) {
+    //   const updateEmailQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${user.username}, email = ${user.email} WHERE id = ?`
+    //   return con.query(updateEmailQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
+    //   if (err) {
+    //     console.error(err);
+    //   }
+    //   res.status(204).send(results);
+    // });
+    // }
+    // else {
+
+    // res.status(403).send(`такен`);
+    // }
+  } 
+  if (email) {
+      con.query(userWithEmail, [Number(id)], (err, results) => {
+        if (err) throw (err)
+          res.status(204).send(results);
+          console.log(results);
+      });
+      if(!username){
+        const updateUserNameQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${getUser.username}, email = ? WHERE id = ?`;
+        con.query(updateUserNameQuery, [Number(id)], (err, results, fields) => {
         if (err) {
           console.error(err);
         }
         res.status(204).send(results);
       });
+      }
 
-      if(!username){
-        const username = getuser.username;
-      } 
       if(!email){
-        const getEmail = getuser.email;
+        const updateEmailQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${getUser.username}, email = ? WHERE id = ?`;
+        con.query(updateEmailQuery, [Number(id)], (err, results, fields) => {
+        if (err) {
+          console.error(err);
+        }
+        res.status(204).send(results);
+      });
       }
-    }
-    if (usersId.includes(userEmail)) {
-      const updateEmailQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${user.username}, email = ${user.email} WHERE id = ?`
-      return con.query(updateEmailQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
-      if (err) {
-        console.error(err);
-      }
-      res.status(204).send(results);
-    });
-    }
-    else {
-
-    res.status(403).send(`такен`);
-    }
-  } else {
-    const updateUserQuery = 'UPDATE users SET firstName = ?, lastName = ?, username = ?, email = ? WHERE id = ?'
-    return con.query(updateUserQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
-      if (err) {
-        console.error(err);
-      }
-      res.status(204).send(results);
-    });
-    }
+  }
+  //   const updateUserQuery = 'UPDATE users SET firstName = ?, lastName = ?, username = ?, email = ? WHERE id = ?'
+  //   return con.query(updateUserQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
+  //     if (err) {
+  //       console.error(err);
+  //     }
+  //     res.status(204).send(results);
+  //   });
+  //   }
   await next;
 }
 
@@ -159,10 +171,35 @@ async function del(req, res, next) {
   await next;
 }
 
+const login = async(req, res, next) => {
+  const { email, password }: { email: string, password: string } = req.body;
+  const userWithEmail = 'SELECT * FROM users WHERE email = ?';
+  return con.query(userWithEmail, email, (err, results) => {
+    if (err) {
+      console.error(err);
+    }
+    const user = results.find(emailObj => emailObj.email === email);
+    console.log('user', user);
+
+      if (results && results.length && user.email) {
+        if (password !== user.password) {
+          res.status(403).send('Password is not correct');
+        } else {
+          res.status(200).send('Logged in');
+        }
+    } else {
+      res.status(404).send(`User with email ${email} not found!`);
+    }
+  });
+   await next;
+}
+
 export default {
   create,
   list,
   get,
   del,
-  update
+  update,
+  login
 } 
+

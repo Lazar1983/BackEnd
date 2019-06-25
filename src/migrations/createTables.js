@@ -1,10 +1,16 @@
 const usersCreateModel = `
   CREATE TABLE IF NOT EXISTS users (
-    id INT NOT NULL,
+    id INT(11) NOT NULL AUTO_INCREMENT,
     firstName CHAR(25),
     lastName CHAR(25),
     username VARCHAR(50) NOT NULL,
     email VARCHAR(75) NOT NULL,
+    password VARCHAR(55) NOT NULL,
+    salt VARCHAR(10),
+    created_at DATE,
+    updated_at DATE,
+    deleted_at DATE,
+    lastSignIn DATE,
     PRIMARY KEY (id)
   )
 `;
