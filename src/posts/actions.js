@@ -119,7 +119,7 @@ async function update(req, res, next) {
   } else {
     const updatePostPerId = await updateSinglePost(text,likes,comments);
     res.status(204).send({ success: true, message: 'A posts is updated', body: {text,likes,comments}});
-    };
+  };
   await next;
 };
 

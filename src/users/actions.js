@@ -1,7 +1,17 @@
 import database from '../database/mysql';
-const { con } = database;
+import queries from '../migrations/queriesSql';
+import Bluebird from 'bluebird';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
-const get = async(req, res, next) => {
+const { con } = database;
+const { updateUserQuery, getUserDataQuery } = queries;
+
+Bluebird.promisifyAll(jwt);
+Bluebird.promisifyAll(bcrypt);
+
+
+const getSingleUser = async(req, res, next) => {
   const { id }: { id: string } = req.params;
   // const id = req.params.id;
   const listingUsersQuery = 'SELECT * FROM users';
@@ -30,7 +40,26 @@ const get = async(req, res, next) => {
   await next;
 }
 
- const list = async(req, res, next) => {
+function getUserData (id) {
+  return new Promise ((resolve, reject) => {
+    con.query(getUserDataQuery, [Number(id)], (err, results) => {
+      if (err){
+        reject(err);
+      }
+      resolve(results); //result e sekogas niza
+    });
+  });
+}
+ 
+async function get(req, res, next) {
+  const { id }: { id: string } = req.params;
+  const users: Array = await getUserData(id);
+  res.status(200).send({ success: true, message: 'Data from ', body: users[0] });
+  await next;
+};
+
+
+const list = async(req, res, next) => {
   const listingUsers = 'SELECT * FROM users'
   return con.query(listingUsers, (err, results, fields) => {
     if (err) {
@@ -41,47 +70,46 @@ const get = async(req, res, next) => {
   await next;
 }
 
-
 async function create(req, res, next) {
   const {
-    id,
     firstName,
     lastName,
     username,
     email,
     password
   }: {
-    id: number,
     firstName: ?string,
     lastName: ?string,
     username: string,
     email: string,
     password: string,
   } = req.body;
+
+  const salt = bcrypt.genSaltSync(10);
+  const getRounds = bcrypt.getRounds(salt);
+  const passHash = bcrypt.hashSync(password,getRounds);
+
   const createAt = new Date(Date.now());
-  const listingUsersQuery = 'SELECT * FROM users';
-  return con.query(listingUsersQuery, (err, results) => {
+  const addQuery = `INSERT INTO users (firstName, lastName, username, email, password, salt, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+  return con.query(addQuery, [firstName, lastName, username, email, passHash, salt,  createAt], (err, results) => {
     if (err) {
       console.error(err);
     }
-    const users = results;
-    const usersIds = users.map(user => user.id);
-    // id = 7;
-    // [1, 2, 3, 4, 5, 6].includes(5)
-    if (usersIds.includes(Number(id))) {
-      res.status(400).send(`Id ${id} is already taken`);
-    } else {
-      const addQuery = `INSERT INTO users (firstName, lastName, username, email, password, created_at) VALUES (?, ?, ?, ?, ?, ?)`
-      return con.query(addQuery, [id, firstName, lastName, username, email, password, createAt], (err, results) => {
-        if (err) {
-          console.error(err);
-        }
-        res.status(201).send({ data: { id, firstName, lastName, username, email, password }})
-      });
-    }
-  })
+    console.log(results);
+    res.status(201).send({ data: { firstName, lastName, username, email, password }})
+  });
 
-   await next;
+  await next;
+}
+
+function updateUser(firstName, lastName, username, email) {
+  return new Promise((resolve, reject) => {
+    con.query(updateUserQuery, [firstName, lastName, username, email], (err, result) => {
+      if (err) {
+        reject(err);
+      }
+    });
+  });
 }
 
 const update = async(req, res, next) => {
@@ -97,66 +125,46 @@ const update = async(req, res, next) => {
     username: ?string,
     email: ?string
   } = Object.assign({}, req.body);
-  const userId = req.body.id;
-  const userWithEmail = 'SELECT * FROM users WHERE email = ?'
- 
-  if (userId) {
-    res.status(403).send(`Id ${id} should not be overwritten`);
-    
-    // if (usersId.includes(userEmail)) {
-    //   const updateEmailQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${user.username}, email = ${user.email} WHERE id = ?`
-    //   return con.query(updateEmailQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
-    //   if (err) {
-    //     console.error(err);
-    //   }
-    //   res.status(204).send(results);
-    // });
-    // }
-    // else {
 
-    // res.status(403).send(`такен`);
-    // }
-  } 
-  if (email) {
-      con.query(userWithEmail, [Number(id)], (err, results) => {
-        if (err) throw (err)
-          res.status(204).send(results);
-          console.log(results);
-      });
-      if(!username){
-        const updateUserNameQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${getUser.username}, email = ? WHERE id = ?`;
-        con.query(updateUserNameQuery, [Number(id)], (err, results, fields) => {
-        if (err) {
-          console.error(err);
-        }
-        res.status(204).send(results);
-      });
-      }
+  const usersFromDB = await getUserData(id);
 
-      if(!email){
-        const updateEmailQuery = `UPDATE users SET firstName = ?, lastName = ?, username = ${getUser.username}, email = ? WHERE id = ?`;
-        con.query(updateEmailQuery, [Number(id)], (err, results, fields) => {
-        if (err) {
-          console.error(err);
-        }
-        res.status(204).send(results);
-      });
-      }
+  const user = usersFromDB[0];
+
+  let userForUpdate = {
+    firstName : '',
+    lastName : '',
+    username : '',
+    email : ''
   }
-  //   const updateUserQuery = 'UPDATE users SET firstName = ?, lastName = ?, username = ?, email = ? WHERE id = ?'
-  //   return con.query(updateUserQuery, [firstName, lastName, username, email, Number(id)], (err, results) => {
-  //     if (err) {
-  //       console.error(err);
-  //     }
-  //     res.status(204).send(results);
-  //   });
-  //   }
+
+  if (firstName) {
+    userForUpdate.firstName = firstName;
+  } else {
+    userForUpdate.firstName = user.firstName;
+  }
+  if (lastName) {
+    userForUpdate.lastName = lastName;
+  }
+  else {
+    userForUpdate.lastName = user.lastName;
+  }
+  if (username) {
+    userForUpdate.username = username;
+  }
+  else {
+    userForUpdate.username = user.username;
+  }
+  if (email) {
+    userForUpdate.email = email;
+  }
+  else {
+    userForUpdate.email = user.email;
+  }
+
+  const updateUserPerId = await updateUser(userForUpdate.firstName, userForUpdate.lastName, userForUpdate.username, userForUpdate.email);
+  res.status(204).send({ success: true, message: 'A user is updated', body: {firstName, lastName, username, email}});
   await next;
 }
-
-//diff between function and arrow fun
-//what is local scope, what is global scope
-// diff between local and global scope
 
 async function del(req, res, next) {
   const { id }: { id: string } = req.params;
@@ -200,6 +208,7 @@ export default {
   get,
   del,
   update,
-  login
+  login,
+  getSingleUser
 } 
 

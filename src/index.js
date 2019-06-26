@@ -5,6 +5,7 @@ import logger from 'morgan';
 import cors from 'cors';
 import database from './database/mysql.js';
 import indexRouter from './index/router';
+import { Promise } from 'bluebird';
 
 const app = express();
 const port = process.env.PORT || 3004;

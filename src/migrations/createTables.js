@@ -5,8 +5,8 @@ const usersCreateModel = `
     lastName CHAR(25),
     username VARCHAR(50) NOT NULL,
     email VARCHAR(75) NOT NULL,
-    password VARCHAR(55) NOT NULL,
-    salt VARCHAR(10),
+    password VARCHAR(64) NOT NULL,
+    salt VARCHAR(255),
     created_at DATE,
     updated_at DATE,
     deleted_at DATE,
@@ -32,3 +32,5 @@ export default {
   usersCreateModel,
   postsCreateModel,
 }
+
+
