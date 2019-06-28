@@ -83,10 +83,13 @@ function deletePost(id) {
 
 async function del(req, res, next) {
   const { id }: { id: string } = req.params;
+  try {
+    const deleteOnePost : Object  = await deletePost(id);
+      res.status(202).send({ success: true, message: 'Post is deleted'});
+  } catch (error) {
+          res.status(500).send({ success: false, message: error.message});
+  }
   
-  const deleteOnePost : Object  = await deletePost(id);
-  
-  res.status(202).send({ success: true, message: 'Post is deleted'});
   await next;
 };
 

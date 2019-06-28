@@ -4,6 +4,7 @@ import actions from './actions';
 const { create, list, get, del, update, login } = actions;
  
 const userRouter = Router();
+
 userRouter.post('/users', create);
 userRouter.get('/users', list);
 userRouter.get('/users/:id', get);

@@ -13,13 +13,9 @@ Bluebird.promisifyAll(bcrypt);
 
 const getSingleUser = async(req, res, next) => {
   const { id }: { id: string } = req.params;
-  // const id = req.params.id;
   const listingUsersQuery = 'SELECT * FROM users';
-  // let usersIds;
   return con.query(listingUsersQuery, (err, results) => {
-    if (err) {
-      console.error(err);
-    }
+    if (err) throw (err)
     const users = results;
     const usersIds = users.map(user => user.id);
 
@@ -27,9 +23,7 @@ const getSingleUser = async(req, res, next) => {
       const querySelectUsersById = 'SELECT * FROM users WHERE id = ?';
     
       return con.query(querySelectUsersById, [Number(id)], (err, results, fields) => {
-        if (err) {
-          console.error(err);
-        }
+        if (err) throw (err)
         res.status(200).send(results);
       });
     } else {
@@ -43,9 +37,7 @@ const getSingleUser = async(req, res, next) => {
 function getUserData (id) {
   return new Promise ((resolve, reject) => {
     con.query(getUserDataQuery, [Number(id)], (err, results) => {
-      if (err){
-        reject(err);
-      }
+      if (err) throw (err)
       resolve(results); //result e sekogas niza
     });
   });
@@ -62,9 +54,7 @@ async function get(req, res, next) {
 const list = async(req, res, next) => {
   const listingUsers = 'SELECT * FROM users'
   return con.query(listingUsers, (err, results, fields) => {
-    if (err) {
-      throw err;
-    }
+    if (err) throw (err);
     res.status(200).send(results);
   });
   await next;
@@ -91,10 +81,8 @@ async function create(req, res, next) {
 
   const createAt = new Date(Date.now());
   const addQuery = `INSERT INTO users (firstName, lastName, username, email, password, salt, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
-  return con.query(addQuery, [firstName, lastName, username, email, passHash, salt,  createAt], (err, results) => {
-    if (err) {
-      console.error(err);
-    }
+  return con.query(addQuery, [firstName, lastName, username, email, passHash, salt, createAt], (err, results) => {
+    if (err) throw (err)
     console.log(results);
     res.status(201).send({ data: { firstName, lastName, username, email, password }})
   });
@@ -102,12 +90,11 @@ async function create(req, res, next) {
   await next;
 }
 
-function updateUser(firstName, lastName, username, email) {
+function updateUser(firstName, lastName, username, email, id) {
   return new Promise((resolve, reject) => {
-    con.query(updateUserQuery, [firstName, lastName, username, email], (err, result) => {
-      if (err) {
-        reject(err);
-      }
+    con.query(updateUserQuery, [firstName, lastName, username, email, id], (err, result) => {
+      if (err) throw (err);
+      resolve(result);
     });
   });
 }
@@ -118,12 +105,14 @@ const update = async(req, res, next) => {
     firstName,
     lastName,
     username,
-    email
+    email,
+    password
   }: {
     firstName: ?string,
     lastName: ?string,
     username: ?string,
-    email: ?string
+    email: ?string,
+    password: ?string
   } = Object.assign({}, req.body);
 
   const usersFromDB = await getUserData(id);
@@ -161,18 +150,30 @@ const update = async(req, res, next) => {
     userForUpdate.email = user.email;
   }
 
-  const updateUserPerId = await updateUser(userForUpdate.firstName, userForUpdate.lastName, userForUpdate.username, userForUpdate.email);
-  res.status(204).send({ success: true, message: 'A user is updated', body: {firstName, lastName, username, email}});
+  if (password && password.length) {
+    const salt = bcrypt.genSaltSync(10);
+    const getRounds = bcrypt.getRounds(salt);
+    const passHash = bcrypt.hashSync(password, getRounds);
+  } else {
+      res.status(404).send('You must to have password');
+  }
+
+  const updateUserPerId = await updateUser(firstName, userForUpdate.lastName, userForUpdate.username, userForUpdate.email, id);
+  res.status(204).send({ success: true, message: 'A user is updated', body: {firstName, lastName, username, email, id}});
+  
   await next;
 }
+
+// function updateUserValues () {
+
+// }
+
 
 async function del(req, res, next) {
   const { id }: { id: string } = req.params;
   const deleteUserByIdQuery = 'DELETE FROM users WHERE id = ?';
   return con.query(deleteUserByIdQuery, parseInt(id), (err, results) => {
-    if (err) {
-      console.error(err);
-    }
+    if (err) throw (err)
     res.status(202).send(`Users with id ${id} is removed`);
   });
 
@@ -181,25 +182,31 @@ async function del(req, res, next) {
 
 const login = async(req, res, next) => {
   const { email, password }: { email: string, password: string } = req.body;
+  
   const userWithEmail = 'SELECT * FROM users WHERE email = ?';
   return con.query(userWithEmail, email, (err, results) => {
     if (err) {
       console.error(err);
     }
     const user = results.find(emailObj => emailObj.email === email);
-    console.log('user', user);
 
-      if (results && results.length && user.email) {
-        if (password !== user.password) {
-          res.status(403).send('Password is not correct');
-        } else {
-          res.status(200).send('Logged in');
-        }
+    if (results && results.length && user.email) {
+      const matchPassword: boolean = bcrypt.compareSync(password, user.password);
+      if (matchPassword) {
+        delete user.password;
+        delete user.salt;
+        const userId = user.id;
+        const token = jwt.sign({ user }, 'aaaa', { expiresIn: '1h'});
+        res.status(200).send({message: 'Logged in', token: token});
+      } else {
+        res.status(403).send('Password is not correct');
+      }
     } else {
       res.status(404).send(`User with email ${email} not found!`);
     }
   });
-   await next;
+
+  await next;
 }
 
 export default {

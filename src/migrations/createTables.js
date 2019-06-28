@@ -5,7 +5,7 @@ const usersCreateModel = `
     lastName CHAR(25),
     username VARCHAR(50) NOT NULL,
     email VARCHAR(75) NOT NULL,
-    password VARCHAR(64) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     salt VARCHAR(255),
     created_at DATE,
     updated_at DATE,
