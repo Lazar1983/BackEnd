@@ -5,7 +5,11 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 const { con } = database;
-const { updateUserQuery, getUserDataQuery } = queries;
+const { 
+  updateUserQuery, 
+  getUserDataQuery, 
+  listUserPostsQuery 
+  } = queries;
 
 Bluebird.promisifyAll(jwt);
 Bluebird.promisifyAll(bcrypt);
@@ -49,6 +53,22 @@ async function get(req, res, next) {
   res.status(200).send({ success: true, message: 'Data from ', body: users[0] });
   await next;
 };
+
+function listingAllPostsFromUser(postId) {
+  return new Promise((resolve, reject) => {
+    con.query(listUserPostsQuery, [Number(postId)], (err, results) => {
+      if (err) throw (err);
+      resolve(results);
+    });
+  });
+};
+
+const listUserPosts = async (req, res, next) => {
+  const { userId }: { userId: string } = req.params;
+  const posts: Array = await listingAllPostsFromUser(userId);
+  res.status(200).send({ success: true, message: 'A list of all posts', body: posts });
+  await next;
+}
 
 
 const list = async(req, res, next) => {
@@ -185,9 +205,7 @@ const login = async(req, res, next) => {
   
   const userWithEmail = 'SELECT * FROM users WHERE email = ?';
   return con.query(userWithEmail, email, (err, results) => {
-    if (err) {
-      console.error(err);
-    }
+    if (err) throw (err)
     const user = results.find(emailObj => emailObj.email === email);
 
     if (results && results.length && user.email) {
@@ -216,6 +234,7 @@ export default {
   del,
   update,
   login,
-  getSingleUser
+  getSingleUser,
+  listUserPosts
 } 
 
