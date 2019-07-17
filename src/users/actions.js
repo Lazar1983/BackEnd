@@ -5,10 +5,14 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 const { con } = database;
+
 const { 
   updateUserQuery, 
   getUserDataQuery, 
-  listUserPostsQuery 
+  listUserPostsQuery,
+  listEmail,
+  userWithEmail,
+  listAllPostsFromUsers
   } = queries;
 
 Bluebird.promisifyAll(jwt);
@@ -54,9 +58,11 @@ async function get(req, res, next) {
   await next;
 };
 
-function listingAllPostsFromUser(postId) {
+
+
+function listingAllPostsFromUser(userId) {
   return new Promise((resolve, reject) => {
-    con.query(listUserPostsQuery, [Number(postId)], (err, results) => {
+    con.query(listAllPostsFromUsers, [Number(userId)], (err, results) => {
       if (err) throw (err);
       resolve(results);
     });
@@ -66,6 +72,19 @@ function listingAllPostsFromUser(postId) {
 const listUserPosts = async (req, res, next) => {
   const { userId }: { userId: string } = req.params;
   const posts: Array = await listingAllPostsFromUser(userId);
+
+  let userPosts = posts[0].userId;
+  console.log(userPosts);
+
+  let post = {
+    userId : posts.userId,
+    text : posts.text,
+    likes : posts.likes,
+    comments: posts.comments
+  };
+
+  console.log(post);
+
   res.status(200).send({ success: true, message: 'A list of all posts', body: posts });
   await next;
 }
@@ -80,31 +99,60 @@ const list = async(req, res, next) => {
   await next;
 }
 
+function checkEmail(email) {
+  return new Promise((resolve, reject) => {
+    con.query(listEmail, [String(email)], (err, results) => {
+      if (err) throw (err);
+      resolve(results);
+    });
+  });
+};
+
+
+
 async function create(req, res, next) {
   const {
     firstName,
     lastName,
     username,
     email,
-    password
+    password,
+    phonenumber
   }: {
     firstName: ?string,
     lastName: ?string,
     username: string,
     email: string,
     password: string,
+    phonenumber: string
   } = req.body;
 
   const salt = bcrypt.genSaltSync(10);
   const getRounds = bcrypt.getRounds(salt);
   const passHash = bcrypt.hashSync(password,getRounds);
 
+  const emailFromDB = await checkEmail(email);
+
+  const emails = emailFromDB[0];
+
+  let emailExist = {
+    email : emails.req.body
+  };
+
+  if (emailFromDB === emailExist) {
+    res.status(404);
+  } else {
+    emails.req.body;
+  }
+
+
+
   const createAt = new Date(Date.now());
-  const addQuery = `INSERT INTO users (firstName, lastName, username, email, password, salt, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
-  return con.query(addQuery, [firstName, lastName, username, email, passHash, salt, createAt], (err, results) => {
+  const addQuery = `INSERT INTO users (firstName, lastName, username, email, phonenumber, password, salt, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  return con.query(addQuery, [firstName, lastName, username, email, phoneUpdate.phonenumber, passHash, salt, createAt], (err, results) => {
     if (err) throw (err)
     console.log(results);
-    res.status(201).send({ data: { firstName, lastName, username, email, password }})
+    res.status(201).send({ data: { firstName, lastName, username, email, phonenumber, password }})
   });
 
   await next;
@@ -175,19 +223,14 @@ const update = async(req, res, next) => {
     const getRounds = bcrypt.getRounds(salt);
     const passHash = bcrypt.hashSync(password, getRounds);
   } else {
-      res.status(404).send('You must to have password');
+    res.status(404).send('You must to have password');
   }
 
-  const updateUserPerId = await updateUser(firstName, userForUpdate.lastName, userForUpdate.username, userForUpdate.email, id);
+  const updateUserPerId = await updateUser(userForUpdate.firstName, userForUpdate.lastName, userForUpdate.username, userForUpdate.email, id);
   res.status(204).send({ success: true, message: 'A user is updated', body: {firstName, lastName, username, email, id}});
   
   await next;
 }
-
-// function updateUserValues () {
-
-// }
-
 
 async function del(req, res, next) {
   const { id }: { id: string } = req.params;
@@ -200,14 +243,20 @@ async function del(req, res, next) {
   await next;
 }
 
-const login = async(req, res, next) => {
-  const { email, password }: { email: string, password: string } = req.body;
-  
-  const userWithEmail = 'SELECT * FROM users WHERE email = ?';
-  return con.query(userWithEmail, email, (err, results) => {
-    if (err) throw (err)
-    const user = results.find(emailObj => emailObj.email === email);
+function loginUserWithPass (email, password) {
+  return new Promise ((resolve, reject) => {
+    con.query(userWithEmail, [String(email), String(password)], (err, results) => {
+      if (err) {
+        reject(err);
+      }
+    resolve(results);
+    });
+  });
+}
 
+function checkLoginEmailandPass (email, password) {
+    const user = results.find(emailObj => emailObj.email === email);
+    
     if (results && results.length && user.email) {
       const matchPassword: boolean = bcrypt.compareSync(password, user.password);
       if (matchPassword) {
@@ -222,10 +271,27 @@ const login = async(req, res, next) => {
     } else {
       res.status(404).send(`User with email ${email} not found!`);
     }
-  });
+}
 
+
+
+async function login (req, res, next) {
+  const { email , password }: { email: string, password: string } = req.body;
+  try {
+    const loginUser : Array = await loginUserWithPass(email, password);
+    const checkLogin = await checkLoginEmailandPass (email, password);
+  } catch (error) {
+    res.status(500).send(`Iternal server error`);
+  }
+  
   await next;
 }
+
+
+
+
+
+
 
 export default {
   create,

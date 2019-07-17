@@ -1,0 +1,19 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost:3004');
+  socket.on('hi', (data) => {
+    console.log('Server', data);
+    socket.emit('hi', 'Hello, I have received msg from you, I am client sender')
+    // socket.emit('newdata', 'New dataa');
+  });
+  // socket.emit('statusnalokal', { sender: 'Broj na slobodni mesta?' });
+  // socket.on('irishpub', (receivedData) => {
+  //   console.log(receivedData);
+  //   // if (receivedData > 0) {
+  //   //   socket.emit('msg', 'Povelete');
+  //   // } else {
+  //   //   socket.emit('msg', 'Dojdete podocna');
+  //   // }
+      
+  // });
+</script>

@@ -6,7 +6,7 @@ const { listingPosts, getSingleItemFromPostsPerId, insertIntoPosts, deleteSingle
 
 function listingAllPosts(userId) {
   return new Promise((resolve, reject) => {
-    con.query(listingPosts, [Number(UserId)], (err, results) => {
+    con.query(listingPosts, [Number(userId)], (err, results) => {
       if (err) throw (err);
       resolve(results);
     });

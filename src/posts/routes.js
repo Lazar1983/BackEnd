@@ -9,7 +9,7 @@ const {
   get, 
   del, 
   update
-  } = actions;
+} = actions;
 
 postRouter.get('/users/:userId/posts', list);
 postRouter.get('/users/:userId/posts/:id', get);

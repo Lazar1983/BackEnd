@@ -7,9 +7,12 @@ const updateUserQuery = 'UPDATE users SET firstName = ?, lastName = ?, username 
 const innerJoin = 'SELECT users.id, posts.id, text, likes, firstName, lastName FROM users AS Users INNER JOIN posts AS Posts ON Users.id = Posts.userId';
 const getUserDataQuery = 'SELECT * FROM users WHERE id=?';
 const listUserPostsQuery = 'SELECT * FROM posts WHERE userId = ?;';
-
-
-
+const listEmail = 'SELECT * FROM users WHERE email = ?;';
+const listingMessage = 'SELECT * FROM messages WHERE id=?';
+const insertIntoMessage ='INSERT INTO messages (messageId, text, textSize) VALUES (?, ?, ?)';
+const getSingleMessage = 'SELECT * FROM messages WHERE userId = ? AND messageId = ?'
+const userWithEmail = 'SELECT * FROM users WHERE email = ?';
+const listAllPostsFromUsers = 'SELECT * FROM users JOIN posts ON users.id = posts.userId WHERE userId = ?'
 
 export default {
   insertIntoPosts,
@@ -19,6 +22,9 @@ export default {
   updatePost,
   updateUserQuery,
   getUserDataQuery,
-  listUserPostsQuery
+  listUserPostsQuery,
+  listEmail,
+  userWithEmail,
+  listAllPostsFromUsers
 
 };
