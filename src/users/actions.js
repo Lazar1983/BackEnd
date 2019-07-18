@@ -73,19 +73,23 @@ const listUserPosts = async (req, res, next) => {
   const { userId }: { userId: string } = req.params;
   const posts: Array = await listingAllPostsFromUser(userId);
 
-  let userPosts = posts[0].userId;
-  console.log(userPosts);
 
-  let post = {
-    userId : posts.userId,
-    text : posts.text,
-    likes : posts.likes,
-    comments: posts.comments
-  };
+  let post = [];
+  let body = {
+    text: posts[0].text,
+    likes: posts[0].likes,
+    comments: posts[0].comments
 
-  console.log(post);
+  }
+  let firstName = posts[0].firstName;
+  let email = posts[0].email;
+ 
+  for (let i = 0; i < posts.lenght; i++) {
+    post.push(body);
+  }
 
-  res.status(200).send({ success: true, message: 'A list of all posts', body: posts });
+
+  res.status(200).send({ success: true, message: 'A list of all posts', body: firstName, email, post });
   await next;
 }
 
