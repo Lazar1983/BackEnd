@@ -75,21 +75,22 @@ const listUserPosts = async (req, res, next) => {
 
 
   let post = [];
-  let body = {
-    text: posts[0].text,
-    likes: posts[0].likes,
-    comments: posts[0].comments
 
-  }
-  let firstName = posts[0].firstName;
+  let firstname = posts[0].firstName;
   let email = posts[0].email;
  
-  for (let i = 0; i < posts.lenght; i++) {
+  for (let i = 0; i < posts.length; i++) {
+    let body = {
+    text: posts[i].text,
+    likes: posts[i].likes,
+    comments: posts[i].comments
+
+  }
     post.push(body);
   }
 
 
-  res.status(200).send({ success: true, message: 'A list of all posts', body: firstName, email, post });
+  res.status(200).send({ success: true, message: 'A list of all posts', body: {firstname, email, post} });
   await next;
 }
 
